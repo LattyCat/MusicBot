@@ -10,9 +10,11 @@ config.read('config/options.ini')
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
+
 @client.event
 async def on_ready():
     print('Logged in as {0.user}'.format(client))
+
 
 @client.event
 async def on_message(message):
@@ -24,7 +26,9 @@ async def on_message(message):
         voice_channel = message.author.voice.channel
         if message.author.voice is None:
             # メッセージを送信したユーザが音声チャンネルに接続していない場合はエラーを送信する
-            await message.channel.send("You need to connect to a voice channel first.")
+            await message.channel.send(
+                "You need to connect to a voice channel first."
+                )
             return
         else:
             # ボイスチャンネルに参加
@@ -47,8 +51,4 @@ async def on_message(message):
                 source = await discord.FFmpegOpusAudio.from_probe(url2)
                 voice_client.play(source)
 
-    if message.content == '!join':
-        voice_client = await voice_channel.connect()
-
 client.run(config['Credentials']['Token'])
-
