@@ -24,15 +24,14 @@ async def on_message(message):
     if message.content.startswith('!play'):
         url = message.content.split()[1]
         voice_channel = message.author.voice.channel
-        if message.author.voice is None:
+        if not voice_channel:
             # メッセージを送信したユーザが音声チャンネルに接続していない場合はエラーを送信する
             await message.channel.send(
-                "You need to connect to a voice channel first."
-                )
+                "You need to connect to a voice channel first.")
             return
         else:
             # ボイスチャンネルに参加
-            print('voice channel join')
+            print('voice channelに接続します')
             voice_client = await voice_channel.connect()
             print('voice channelに接続しました')
 
