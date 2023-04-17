@@ -2,10 +2,10 @@ FROM mcr.microsoft.com/devcontainers/python:0-3.9
 
 # Install dependencies
 RUN apt-get update && apt-get install \
-ffmpeg \
-libffi-dev \
-libnacl-dev \
-python-dev -y \
+ffmpeg  -y \
+# libffi-dev \
+# libnacl-dev \
+# python-dev -y \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/*
 
