@@ -22,7 +22,7 @@ async def join_voice_channel(voice_channel):
         return None
 
 
-async def play_audio(voice_client, url):
+async def play_audio(voice_client, url, default_volume=config['Player']['DefaultVolume']):
     try:
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -36,7 +36,8 @@ async def play_audio(voice_client, url):
             info_dict = ydl.extract_info(url, download=False)
             url2 = info_dict.get("url", None)
             source = await discord.FFmpegOpusAudio.from_probe(url2)
-            voice_client.play(source)
+            volume_transformer = discord.PCMVolumeTransformer(source, volume=default_volume/100)
+            voice_client.play(volume_transformer)
     except Exception as e:
         print(f'Error playing audio: {e}')
 
