@@ -69,7 +69,7 @@ async def on_message(message):
 
         voice_channel = message.author.voice.channel
         voice_client = discord.utils.get(
-            client.voice_clients, guild=message.guild)
+            bot.voice_clients, guild=message.guild)
         if voice_client and voice_client.is_playing():
             voice_client.stop()
 
@@ -79,6 +79,5 @@ async def on_message(message):
                 return
 
         await play_audio(voice_client, url)
-
 
 bot.run(config['credentials']['token'])
