@@ -33,15 +33,14 @@ async def play_audio(
             'format': 'bestaudio/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
+                'preferredcodec': 'opus',
                 'preferredquality': '192',
             }]
         }
         with YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=False)
             url2 = info_dict.get("url", None)
-            source = await discord.FFmpegOpusAudio.from_probe(url2)
-            # source = discord.FFmpegPCMAudio(url2) 
+            source = discord.FFmpegPCMAudio(url2, options="-acodec pcm_s16le")
             volume_transformer = discord.PCMVolumeTransformer(
                 source, volume=default_volume/100)
             voice_client.play(volume_transformer)
