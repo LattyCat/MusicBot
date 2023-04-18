@@ -22,7 +22,10 @@ async def join_voice_channel(voice_channel):
         return None
 
 
-async def play_audio(voice_client, url, default_volume=config['Player']['DefaultVolume']):
+async def play_audio(
+        voice_client, url,
+        default_volume=int(config['Player']['DefaultVolume'])
+        ):
     try:
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -36,7 +39,8 @@ async def play_audio(voice_client, url, default_volume=config['Player']['Default
             info_dict = ydl.extract_info(url, download=False)
             url2 = info_dict.get("url", None)
             source = await discord.FFmpegOpusAudio.from_probe(url2)
-            volume_transformer = discord.PCMVolumeTransformer(source, volume=default_volume/100)
+            volume_transformer = discord.PCMVolumeTransformer(
+                source, volume=default_volume/100)
             voice_client.play(volume_transformer)
     except Exception as e:
         print(f'Error playing audio: {e}')
@@ -55,12 +59,15 @@ async def on_message(message):
     if message.content.startswith('!play'):
         url = message.content.split()[1]
 
-        if message.author.voice is None or message.author.voice.channel is None:
-            await message.channel.send("You need to connect to a voice channel first.")
+        if message.author.voice is None or \
+                message.author.voice.channel is None:
+            await message.channel.send(
+                "You need to connect to a voice channel first.")
             return
 
         voice_channel = message.author.voice.channel
-        voice_client = discord.utils.get(client.voice_clients, guild=message.guild)
+        voice_client = discord.utils.get(
+            client.voice_clients, guild=message.guild)
         if voice_client and voice_client.is_playing():
             voice_client.stop()
 
