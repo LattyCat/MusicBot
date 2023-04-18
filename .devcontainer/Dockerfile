@@ -10,4 +10,5 @@ python-dev -y \
 && rm -rf /var/lib/apt/lists/*
 
 # Install pip dependencies
-RUN pip3 install --no-cache-dir yt-dlp pynacl 'discord.py[voice]==1.7.3'
+RUN pip3 install --upgrade pip
+RUN pip3 install --no-cache-dir yt-dlp pynacl discord opuslib
