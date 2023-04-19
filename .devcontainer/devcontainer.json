@@ -23,7 +23,8 @@
 			"extensions": [
 				"ms-python.python",
 				"ms-python.flake8",
-				"eamodio.gitlens"
+				"eamodio.gitlens",
+				"mhutchie.git-graph"
 			]
 		}
 	}
