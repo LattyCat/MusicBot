@@ -64,7 +64,7 @@ async def on_message(message):
         if message.author.voice is None or \
                 message.author.voice.channel is None:
             await message.channel.send(
-                "You need to connect to a voice channel first.")
+                "音声チャンネルに接続してからコマンドを実行してください")
             return
 
         voice_channel = message.author.voice.channel
