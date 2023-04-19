@@ -1,13 +1,15 @@
 import configparser
 
 import discord
+from discord.ext import commands
 from yt_dlp import YoutubeDL
-
 
 config = configparser.ConfigParser()
 config.read('config/options.ini')
 
 intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix='>', intents=intents)
 client = discord.Client(intents=intents)
 
 
@@ -24,21 +26,21 @@ async def join_voice_channel(voice_channel):
 
 async def play_audio(
         voice_client, url,
-        default_volume=int(config['Player']['DefaultVolume'])
+        default_volume=int(config['player']['default_volume'])
         ):
     try:
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '128',
+                'preferredcodec': 'opus',
+                'preferredquality': '192',
             }]
         }
         with YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=False)
             url2 = info_dict.get("url", None)
-            source = await discord.FFmpegOpusAudio.from_probe(url2)
+            source = discord.FFmpegPCMAudio(url2, options="-acodec pcm_s16le")
             volume_transformer = discord.PCMVolumeTransformer(
                 source, volume=default_volume/100)
             voice_client.play(volume_transformer)
@@ -46,12 +48,12 @@ async def play_audio(
         print(f'Error playing audio: {e}')
 
 
-@client.event
-async def on_ready():
-    print('Logged in as {0.user}'.format(client))
+@bot.command()
+async def ping(ctx):
+    await ctx.send('pong')
 
 
-@client.event
+@bot.listen()
 async def on_message(message):
     if message.author == client.user:
         return
@@ -67,7 +69,7 @@ async def on_message(message):
 
         voice_channel = message.author.voice.channel
         voice_client = discord.utils.get(
-            client.voice_clients, guild=message.guild)
+            bot.voice_clients, guild=message.guild)
         if voice_client and voice_client.is_playing():
             voice_client.stop()
 
@@ -78,4 +80,4 @@ async def on_message(message):
 
         await play_audio(voice_client, url)
 
-client.run(config['Credentials']['Token'])
+bot.run(config['credentials']['token'])
