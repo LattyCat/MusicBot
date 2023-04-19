@@ -48,6 +48,13 @@ async def disconnect_if_empty(voice_client):
         await voice_client.disconnect()
 
 
+async def user_in_voice_channel(ctx):
+    if ctx.author.voice is None or ctx.author.voice.channel is None:
+        await ctx.send("音声チャンネルに接続してからコマンドを実行してください")
+        return False
+    return True
+
+
 def change_volume(new_volume):
     global volume_transformer
     if volume_transformer is not None:
@@ -61,8 +68,7 @@ async def ping(ctx):
 
 @bot.command()
 async def play(ctx, url):
-    if ctx.author.voice is None or ctx.author.voice.channel is None:
-        await ctx.send("音声チャンネルに接続してからコマンドを実行してください")
+    if not await user_in_voice_channel(ctx):
         return
 
     voice_channel = ctx.author.voice.channel
@@ -86,8 +92,7 @@ async def play(ctx, url):
 
 @bot.command()
 async def stop(ctx):
-    if ctx.author.voice is None or ctx.author.voice.channel is None:
-        await ctx.send("音声チャンネルに接続してからコマンドを実行してください")
+    if not await user_in_voice_channel(ctx):
         return
 
     voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
