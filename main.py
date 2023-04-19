@@ -80,4 +80,16 @@ async def on_message(message):
 
         await play_audio(voice_client, url)
 
+    if message.content == '!stop':
+        if message.author.voice is None or \
+                message.author.voice.channel is None:
+            await message.channel.send(
+                "音声チャンネルに接続してからコマンドを実行してください"
+                )
+        voice_channel = message.author.voice.channel
+        voice_client = discord.utils.get(
+            bot.voice_clients, guild=message.guild)
+        if voice_client.is_playing():
+            voice_client.stop()
+
 bot.run(config['credentials']['token'])
