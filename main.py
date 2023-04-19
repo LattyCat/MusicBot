@@ -1,3 +1,4 @@
+import asyncio
 import configparser
 import discord
 from discord.ext import commands
@@ -37,6 +38,14 @@ async def play_audio(voice_client, url, default_volume=int(
         volume_transformer = discord.PCMVolumeTransformer(
             source, volume=default_volume / 100)
         voice_client.play(volume_transformer)
+    await disconnect_if_empty(voice_client)
+
+
+async def disconnect_if_empty(voice_client):
+    await asyncio.sleep(300)  # 5 minutes
+    if not voice_client.is_playing() \
+            and len(voice_client.channel.members) == 1:
+        await voice_client.disconnect()
 
 
 def change_volume(new_volume):
