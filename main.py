@@ -38,7 +38,7 @@ async def play_audio(voice_client, url, default_volume=int(
         volume_transformer = discord.PCMVolumeTransformer(
             source, volume=default_volume / 100)
         voice_client.play(volume_transformer)
-    await disconnect_if_empty(voice_client)
+    asyncio.create_task(disconnect_if_empty(voice_client))
 
 
 async def disconnect_if_empty(voice_client):
