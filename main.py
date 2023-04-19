@@ -62,6 +62,12 @@ async def user_in_voice_channel(ctx):
     return True
 
 
+async def disconnect_after_timeout(voice_client, timeout=180):
+    await asyncio.sleep(timeout)  # 3 minutes (180 seconds)
+    if not voice_client.is_playing():
+        await voice_client.disconnect()
+
+
 def change_volume(new_volume):
     global volume_transformer
     if volume_transformer is not None:
@@ -105,6 +111,7 @@ async def stop(ctx):
     voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice_client and voice_client.is_playing():
         voice_client.stop()
+        asyncio.create_task(disconnect_after_timeout(voice_client))
 
 
 @bot.command()
