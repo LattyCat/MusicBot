@@ -9,6 +9,7 @@ config.read('config/options.ini')
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
+volume_transformer = None
 
 
 async def join_voice_channel(voice_channel):
@@ -18,7 +19,9 @@ async def join_voice_channel(voice_channel):
     return voice_client
 
 
-async def play_audio(voice_client, url, default_volume):
+async def play_audio(voice_client, url, default_volume=int(
+        config['player']['default_volume'])):
+    global volume_transformer
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -34,6 +37,12 @@ async def play_audio(voice_client, url, default_volume):
         volume_transformer = discord.PCMVolumeTransformer(
             source, volume=default_volume / 100)
         voice_client.play(volume_transformer)
+
+
+def change_volume(new_volume):
+    global volume_transformer
+    if volume_transformer is not None:
+        volume_transformer.volume = new_volume / 100
 
 
 @bot.command()
@@ -75,5 +84,15 @@ async def stop(ctx):
     voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice_client and voice_client.is_playing():
         voice_client.stop()
+
+
+@bot.command()
+async def volume(ctx, new_volume: int):
+    if new_volume < 0 or new_volume > 100:
+        await ctx.send("ボリュームは0から100の範囲で指定してください。")
+        return
+
+    change_volume(new_volume)
+    await ctx.send(f"ボリュームを{new_volume}%に設定しました。")
 
 bot.run(config['credentials']['token'])
