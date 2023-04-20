@@ -39,20 +39,8 @@ async def play_audio(voice_client, url, default_volume=int(
             source, volume=default_volume / 100)
         voice_client.play(volume_transformer, after=lambda e:
                           asyncio.run_coroutine_threadsafe(
-                            on_play_finished(voice_client), bot.loop))
-    asyncio.create_task(disconnect_if_empty(voice_client))
-
-
-async def on_play_finished(voice_client):
-    if not voice_client.is_playing():
-        asyncio.create_task(disconnect_if_empty(voice_client))
-
-
-async def disconnect_if_empty(voice_client):
-    await asyncio.sleep(30)  # 30 seconds
-    if not voice_client.is_playing() \
-            and len(voice_client.channel.members) == 1:
-        await voice_client.disconnect()
+                            disconnect_after_timeout(voice_client), bot.loop))
+    asyncio.create_task(disconnect_after_timeout(voice_client))
 
 
 async def user_in_voice_channel(ctx):
@@ -60,6 +48,12 @@ async def user_in_voice_channel(ctx):
         await ctx.send("音声チャンネルに接続してからコマンドを実行してください")
         return False
     return True
+
+
+async def disconnect_after_timeout(voice_client, timeout=180):
+    await asyncio.sleep(timeout)
+    if not voice_client.is_playing():
+        await voice_client.disconnect()
 
 
 def change_volume(new_volume):
@@ -105,6 +99,7 @@ async def stop(ctx):
     voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice_client and voice_client.is_playing():
         voice_client.stop()
+        asyncio.create_task(disconnect_after_timeout(voice_client))
 
 
 @bot.command()
