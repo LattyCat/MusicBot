@@ -24,7 +24,9 @@
 				"ms-python.python",
 				"ms-python.flake8",
 				"eamodio.gitlens",
-				"mhutchie.git-graph"
+				"mhutchie.git-graph",
+				"GitHub.copilot",
+				"GitHub.copilot-labs"
 			]
 		}
 	}
