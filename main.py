@@ -37,10 +37,10 @@ async def play_audio(voice_client, url, default_volume=int(
     # Get the URL
     with YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(url, download=False)
-        url2 = info_dict.get("url", None)
+        url2 = info_dict.get('url', None)
 
     # Play the audio
-    source = discord.FFmpegPCMAudio(url2, options="-acodec pcm_s16le")
+    source = discord.FFmpegPCMAudio(url2, options='-acodec pcm_s16le')
     VOLUME_TRANSFORMER = discord.PCMVolumeTransformer(
         source, volume=default_volume / 100)
     voice_client.play(VOLUME_TRANSFORMER, after=lambda e:
@@ -52,12 +52,12 @@ async def play_audio(voice_client, url, default_volume=int(
 # ユーザーが音声チャンネルに接続しているかを確認
 async def user_in_voice_channel(ctx):
     if ctx.author.voice is None or ctx.author.voice.channel is None:
-        await ctx.send("音声チャンネルに接続してからコマンドを実行してください")
+        await ctx.send('音声チャンネルに接続してからコマンドを実行してください')
         return False
     return True
 
 
-# 再生が終了していたら指定したタイムアウト後に切断
+# 再生が終了していたら指定した時間後にBotを切断
 async def disconnect_after_timeout(voice_client, timeout=180):
     await asyncio.sleep(timeout)
     if not voice_client.is_playing():
@@ -118,10 +118,10 @@ async def stop(ctx):
 @BOT.command()
 async def volume(ctx, new_volume: int):
     if new_volume < 0 or new_volume > 100:
-        await ctx.send("ボリュームは0から100の範囲で指定してください。")
+        await ctx.send('ボリュームは0から100の範囲で指定してください。')
         return
 
     change_volume(new_volume)
-    await ctx.send(f"ボリュームを{new_volume}%に設定しました。")
+    await ctx.send(f'ボリュームを{new_volume}%に設定しました。')
 
 BOT.run(CONFIG['credentials']['token'])
