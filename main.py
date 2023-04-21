@@ -13,6 +13,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 volume_transformer = None
 
 
+# Voice channelへの接続
 async def join_voice_channel(voice_channel):
     print('voice channelに接続します')
     voice_client = await voice_channel.connect()
@@ -20,6 +21,7 @@ async def join_voice_channel(voice_channel):
     return voice_client
 
 
+# Audioの再生
 async def play_audio(voice_client, url, default_volume=int(
         config['player']['default_volume'])):
     global volume_transformer
@@ -31,18 +33,23 @@ async def play_audio(voice_client, url, default_volume=int(
             'preferredquality': '192',
         }]
     }
+
+    # Get the URL
     with YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(url, download=False)
         url2 = info_dict.get("url", None)
-        source = discord.FFmpegPCMAudio(url2, options="-acodec pcm_s16le")
-        volume_transformer = discord.PCMVolumeTransformer(
-            source, volume=default_volume / 100)
-        voice_client.play(volume_transformer, after=lambda e:
-                          asyncio.run_coroutine_threadsafe(
-                            disconnect_after_timeout(voice_client), bot.loop))
+
+    # Play the audio
+    source = discord.FFmpegPCMAudio(url2, options="-acodec pcm_s16le")
+    volume_transformer = discord.PCMVolumeTransformer(
+        source, volume=default_volume / 100)
+    voice_client.play(volume_transformer, after=lambda e:
+                      asyncio.run_coroutine_threadsafe(
+                        disconnect_after_timeout(voice_client), bot.loop))
     asyncio.create_task(disconnect_after_timeout(voice_client))
 
 
+# ユーザーが音声チャンネルに接続しているかを確認
 async def user_in_voice_channel(ctx):
     if ctx.author.voice is None or ctx.author.voice.channel is None:
         await ctx.send("音声チャンネルに接続してからコマンドを実行してください")
@@ -50,23 +57,27 @@ async def user_in_voice_channel(ctx):
     return True
 
 
+# 再生が終了していたら指定したタイムアウト後に切断
 async def disconnect_after_timeout(voice_client, timeout=180):
     await asyncio.sleep(timeout)
     if not voice_client.is_playing():
         await voice_client.disconnect()
 
 
+# 音量変更
 def change_volume(new_volume):
     global volume_transformer
     if volume_transformer is not None:
         volume_transformer.volume = new_volume / 100
 
 
+# pingコマンド
 @bot.command()
 async def ping(ctx):
     await ctx.send('pong')
 
 
+# 再生コマンド
 @bot.command()
 async def play(ctx, url):
     if not await user_in_voice_channel(ctx):
@@ -91,6 +102,7 @@ async def play(ctx, url):
         print(f'Error playing audio: {e}')
 
 
+# 停止コマンド
 @bot.command()
 async def stop(ctx):
     if not await user_in_voice_channel(ctx):
@@ -102,6 +114,7 @@ async def stop(ctx):
         asyncio.create_task(disconnect_after_timeout(voice_client))
 
 
+# ボリューム変更コマンド
 @bot.command()
 async def volume(ctx, new_volume: int):
     if new_volume < 0 or new_volume > 100:
